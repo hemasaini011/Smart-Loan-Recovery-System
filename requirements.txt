@@ -1,0 +1,9 @@
+streamlit
+streamlit-option-menu
+numpy
+pandas
+plotly
+matplotlib
+scikit-learn
+reportlab
+pickle5
