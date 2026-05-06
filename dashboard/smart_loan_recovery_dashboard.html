@@ -1,0 +1,299 @@
+
+<h2 class="sr-only">Smart Loan Recovery System Dashboard — 500 borrowers, recovery status, loan type distribution, collection methods, and demographics.</h2>
+
+<style>
+  @import url('https://fonts.googleapis.com/css2?family=DM+Sans:wght@400;500;600&family=DM+Serif+Display&display=swap');
+  .slrs * { box-sizing: border-box; margin: 0; padding: 0; }
+  .slrs { font-family: 'DM Sans', var(--font-sans); color: var(--color-text-primary); padding: 0 0 2rem; }
+  .slrs-header { background: #0f1f3d; border-radius: var(--border-radius-lg); padding: 1.25rem 1.5rem; margin-bottom: 1.5rem; display: flex; align-items: center; gap: 1rem; }
+  .slrs-logo { width: 40px; height: 40px; background: #f5c842; border-radius: 50%; display: flex; align-items: center; justify-content: center; font-size: 18px; flex-shrink: 0; }
+  .slrs-header h1 { color: #fff; font-size: 20px; font-weight: 600; letter-spacing: -0.3px; }
+  .slrs-header p { color: #8fa6cc; font-size: 13px; margin-top: 2px; }
+  .slrs-badge { margin-left: auto; background: rgba(245,200,66,0.15); color: #f5c842; font-size: 11px; font-weight: 500; padding: 4px 10px; border-radius: 20px; border: 1px solid rgba(245,200,66,0.3); white-space: nowrap; }
+  .metrics-grid { display: grid; grid-template-columns: repeat(4, minmax(0, 1fr)); gap: 10px; margin-bottom: 1.25rem; }
+  .metric-card { background: var(--color-background-secondary); border-radius: var(--border-radius-md); padding: 1rem 1.1rem; }
+  .metric-label { font-size: 12px; color: var(--color-text-secondary); font-weight: 500; text-transform: uppercase; letter-spacing: 0.5px; margin-bottom: 6px; }
+  .metric-value { font-size: 26px; font-weight: 600; line-height: 1; }
+  .metric-sub { font-size: 12px; color: var(--color-text-secondary); margin-top: 4px; }
+  .metric-card.blue .metric-value { color: #185FA5; }
+  .metric-card.green .metric-value { color: #3B6D11; }
+  .metric-card.amber .metric-value { color: #854F0B; }
+  .metric-card.red .metric-value { color: #A32D2D; }
+  .charts-row { display: grid; grid-template-columns: 1.4fr 1fr; gap: 12px; margin-bottom: 12px; }
+  .charts-row2 { display: grid; grid-template-columns: 1fr 1fr 1fr; gap: 12px; margin-bottom: 12px; }
+  .chart-card { background: var(--color-background-primary); border: 0.5px solid var(--color-border-tertiary); border-radius: var(--border-radius-lg); padding: 1rem 1.25rem; }
+  .chart-title { font-size: 13px; font-weight: 500; color: var(--color-text-secondary); margin-bottom: 12px; text-transform: uppercase; letter-spacing: 0.4px; }
+  .legend { display: flex; flex-wrap: wrap; gap: 10px; margin-bottom: 10px; font-size: 12px; color: var(--color-text-secondary); }
+  .legend span { display: flex; align-items: center; gap: 5px; }
+  .dot { width: 9px; height: 9px; border-radius: 2px; display: inline-block; flex-shrink: 0; }
+  .risk-bar-row { display: flex; flex-direction: column; gap: 6px; margin-top: 8px; }
+  .rb-item { display: flex; align-items: center; gap: 8px; font-size: 12px; }
+  .rb-label { min-width: 90px; color: var(--color-text-secondary); }
+  .rb-track { flex: 1; height: 22px; background: var(--color-background-secondary); border-radius: 4px; overflow: hidden; position: relative; }
+  .rb-fill { height: 100%; display: flex; align-items: center; padding-left: 8px; font-size: 11px; font-weight: 500; border-radius: 4px; color: #fff; transition: width 1s ease; }
+  .rb-count { min-width: 28px; text-align: right; color: var(--color-text-secondary); }
+  .donut-wrap { display: flex; align-items: center; gap: 16px; }
+  .donut-legend { flex: 1; display: flex; flex-direction: column; gap: 8px; font-size: 12px; }
+  .dl-row { display: flex; justify-content: space-between; align-items: center; }
+  .dl-label { display: flex; align-items: center; gap: 6px; color: var(--color-text-secondary); }
+  .dl-val { font-weight: 500; color: var(--color-text-primary); }
+  .info-row { display: grid; grid-template-columns: 1fr 1fr; gap: 12px; }
+  .stat-list { display: flex; flex-direction: column; gap: 8px; margin-top: 8px; }
+  .stat-item { display: flex; justify-content: space-between; align-items: center; padding: 7px 10px; background: var(--color-background-secondary); border-radius: 6px; font-size: 13px; }
+  .stat-name { color: var(--color-text-secondary); }
+  .stat-val { font-weight: 500; }
+  .stat-pct { font-size: 11px; color: var(--color-text-secondary); }
+  .summary-card { background: #0f1f3d; border-radius: var(--border-radius-lg); padding: 1.1rem 1.4rem; display: flex; align-items: center; justify-content: space-between; gap: 1rem; }
+  .summary-card p { color: #8fa6cc; font-size: 13px; margin-top: 3px; }
+  .summary-card h3 { color: #fff; font-size: 15px; font-weight: 500; }
+  .pill { background: rgba(30,160,100,0.18); color: #2f9e6f; font-size: 11px; font-weight: 500; padding: 3px 10px; border-radius: 20px; }
+  .pill.warn { background: rgba(186,117,23,0.15); color: #996b0e; }
+  .pill.danger { background: rgba(163,45,45,0.12); color: #A32D2D; }
+</style>
+
+<div class="slrs">
+  <div class="slrs-header">
+    <div class="slrs-logo">🏦</div>
+    <div>
+      <h1>Smart Loan Recovery System</h1>
+      <p>Recovery Analytics Dashboard — 500 borrower records</p>
+    </div>
+    <div class="slrs-badge">Live Dataset</div>
+  </div>
+
+  <div class="metrics-grid">
+    <div class="metric-card blue">
+      <div class="metric-label">Total Borrowers</div>
+      <div class="metric-value">500</div>
+      <div class="metric-sub">Loan portfolio</div>
+    </div>
+    <div class="metric-card green">
+      <div class="metric-label">Fully Recovered</div>
+      <div class="metric-value">296</div>
+      <div class="metric-sub">59.2% of portfolio</div>
+    </div>
+    <div class="metric-card amber">
+      <div class="metric-label">Partially Recovered</div>
+      <div class="metric-value">154</div>
+      <div class="metric-sub">30.8% of portfolio</div>
+    </div>
+    <div class="metric-card red">
+      <div class="metric-label">Written Off</div>
+      <div class="metric-value">50</div>
+      <div class="metric-sub">10.0% of portfolio</div>
+    </div>
+  </div>
+
+  <div class="charts-row">
+    <div class="chart-card">
+      <div class="chart-title">Recovery Status Distribution</div>
+      <div class="legend">
+        <span><i class="dot" style="background:#185FA5"></i> Fully Recovered (59.2%)</span>
+        <span><i class="dot" style="background:#BA7517"></i> Partially Recovered (30.8%)</span>
+        <span><i class="dot" style="background:#A32D2D"></i> Written Off (10.0%)</span>
+      </div>
+      <div style="position:relative;height:200px">
+        <canvas id="c1" role="img" aria-label="Bar chart of recovery status: 296 Fully Recovered, 154 Partially Recovered, 50 Written Off">Recovery: 296 fully, 154 partial, 50 written off.</canvas>
+      </div>
+    </div>
+    <div class="chart-card">
+      <div class="chart-title">Loan Type Breakdown</div>
+      <div class="donut-wrap">
+        <div style="position:relative;width:120px;height:120px;flex-shrink:0">
+          <canvas id="c2" role="img" aria-label="Donut chart: Personal 220, Home 144, Auto 87, Business 49">Loans: Personal 220, Home 144, Auto 87, Business 49.</canvas>
+        </div>
+        <div class="donut-legend">
+          <div class="dl-row"><div class="dl-label"><i class="dot" style="background:#185FA5"></i>Personal</div><div class="dl-val">220 <span class="stat-pct">44%</span></div></div>
+          <div class="dl-row"><div class="dl-label"><i class="dot" style="background:#3B6D11"></i>Home</div><div class="dl-val">144 <span class="stat-pct">28.8%</span></div></div>
+          <div class="dl-row"><div class="dl-label"><i class="dot" style="background:#BA7517"></i>Auto</div><div class="dl-val">87 <span class="stat-pct">17.4%</span></div></div>
+          <div class="dl-row"><div class="dl-label"><i class="dot" style="background:#A32D2D"></i>Business</div><div class="dl-val">49 <span class="stat-pct">9.8%</span></div></div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <div class="charts-row2">
+    <div class="chart-card">
+      <div class="chart-title">Collection Methods</div>
+      <div class="risk-bar-row">
+        <div class="rb-item">
+          <div class="rb-label">Calls</div>
+          <div class="rb-track"><div class="rb-fill" style="width:100%;background:#185FA5">129</div></div>
+        </div>
+        <div class="rb-item">
+          <div class="rb-label">Legal Notice</div>
+          <div class="rb-track"><div class="rb-fill" style="width:97.7%;background:#534AB7">126</div></div>
+        </div>
+        <div class="rb-item">
+          <div class="rb-label">Debt Collectors</div>
+          <div class="rb-track"><div class="rb-fill" style="width:96.9%;background:#854F0B">125</div></div>
+        </div>
+        <div class="rb-item">
+          <div class="rb-label">Settlement</div>
+          <div class="rb-track"><div class="rb-fill" style="width:93%;background:#0F6E56">120</div></div>
+        </div>
+      </div>
+    </div>
+    <div class="chart-card">
+      <div class="chart-title">Age Distribution</div>
+      <div style="position:relative;height:160px">
+        <canvas id="c3" role="img" aria-label="Age distribution bar chart across 5 age groups">18-30: 109, 31-40: 93, 41-50: 129, 51-60: 127, 61+: 42.</canvas>
+      </div>
+    </div>
+    <div class="chart-card">
+      <div class="chart-title">Employment Type</div>
+      <div class="stat-list">
+        <div class="stat-item">
+          <span class="stat-name">Salaried</span>
+          <span class="stat-val">292 <span class="stat-pct">58.4%</span></span>
+        </div>
+        <div class="stat-item">
+          <span class="stat-name">Self-Employed</span>
+          <span class="stat-val">155 <span class="stat-pct">31.0%</span></span>
+        </div>
+        <div class="stat-item">
+          <span class="stat-name">Business Owner</span>
+          <span class="stat-val">53 <span class="stat-pct">10.6%</span></span>
+        </div>
+      </div>
+      <div style="margin-top:14px">
+        <div class="chart-title">Gender Split</div>
+        <div style="display:flex;align-items:center;gap:8px;margin-top:8px">
+          <div style="flex:311;height:20px;background:#185FA5;border-radius:4px 0 0 4px;display:flex;align-items:center;padding-left:8px;font-size:11px;color:#fff;font-weight:500">Male 62.2%</div>
+          <div style="flex:189;height:20px;background:#D4537E;border-radius:0 4px 4px 0;display:flex;align-items:center;justify-content:flex-end;padding-right:8px;font-size:11px;color:#fff;font-weight:500">F 37.8%</div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <div class="info-row" style="margin-bottom:12px">
+    <div class="chart-card">
+      <div class="chart-title">Key Metrics</div>
+      <div class="stat-list">
+        <div class="stat-item">
+          <span class="stat-name">Total Loan Portfolio</span>
+          <span class="stat-val">₹51.2 Cr</span>
+        </div>
+        <div class="stat-item">
+          <span class="stat-name">Outstanding Amount</span>
+          <span class="stat-val">₹28.1 Cr</span>
+        </div>
+        <div class="stat-item">
+          <span class="stat-name">Avg Missed Payments</span>
+          <span class="stat-val">1.91</span>
+        </div>
+        <div class="stat-item">
+          <span class="stat-name">Avg Days Past Due</span>
+          <span class="stat-val">70.7 days</span>
+        </div>
+        <div class="stat-item">
+          <span class="stat-name">Legal Action Taken</span>
+          <span class="stat-val">24 cases <span class="stat-pct">4.8%</span></span>
+        </div>
+      </div>
+    </div>
+    <div class="chart-card">
+      <div class="chart-title">Recovery Rate by Loan Type</div>
+      <div style="position:relative;height:180px">
+        <canvas id="c4" role="img" aria-label="Grouped bar chart showing recovery status by loan type">Recovery by loan type comparison.</canvas>
+      </div>
+    </div>
+  </div>
+
+  <div class="summary-card">
+    <div>
+      <h3>Portfolio Health Score</h3>
+      <p>59.2% full recovery rate with 10% write-off risk — moderate performance</p>
+    </div>
+    <div style="display:flex;gap:8px;flex-wrap:wrap">
+      <span class="pill">59.2% Recovered</span>
+      <span class="pill warn">30.8% Partial</span>
+      <span class="pill danger">10% Written Off</span>
+    </div>
+  </div>
+</div>
+
+<script src="https://cdnjs.cloudflare.com/ajax/libs/Chart.js/4.4.1/chart.umd.js"></script>
+<script>
+const isDark = matchMedia('(prefers-color-scheme: dark)').matches;
+const textColor = isDark ? 'rgba(255,255,255,0.6)' : 'rgba(0,0,0,0.5)';
+const gridColor = isDark ? 'rgba(255,255,255,0.08)' : 'rgba(0,0,0,0.07)';
+
+new Chart(document.getElementById('c1'), {
+  type: 'bar',
+  data: {
+    labels: ['Fully Recovered', 'Partially Recovered', 'Written Off'],
+    datasets: [{
+      data: [296, 154, 50],
+      backgroundColor: ['#185FA5', '#BA7517', '#A32D2D'],
+      borderRadius: 6,
+      borderSkipped: false,
+    }]
+  },
+  options: {
+    responsive: true, maintainAspectRatio: false,
+    plugins: { legend: { display: false }, tooltip: { callbacks: { label: ctx => ` ${ctx.raw} borrowers` } } },
+    scales: {
+      x: { ticks: { color: textColor, font: { size: 11 } }, grid: { display: false }, border: { display: false } },
+      y: { ticks: { color: textColor, font: { size: 11 } }, grid: { color: gridColor }, border: { display: false } }
+    }
+  }
+});
+
+new Chart(document.getElementById('c2'), {
+  type: 'doughnut',
+  data: {
+    labels: ['Personal', 'Home', 'Auto', 'Business'],
+    datasets: [{
+      data: [220, 144, 87, 49],
+      backgroundColor: ['#185FA5', '#3B6D11', '#BA7517', '#A32D2D'],
+      borderWidth: 0,
+      hoverOffset: 4
+    }]
+  },
+  options: {
+    responsive: true, maintainAspectRatio: false, cutout: '68%',
+    plugins: { legend: { display: false } }
+  }
+});
+
+new Chart(document.getElementById('c3'), {
+  type: 'bar',
+  data: {
+    labels: ['18-30', '31-40', '41-50', '51-60', '61+'],
+    datasets: [{
+      data: [109, 93, 129, 127, 42],
+      backgroundColor: ['#185FA5','#185FA5','#185FA5','#185FA5','#185FA5'],
+      borderRadius: 4, borderSkipped: false
+    }]
+  },
+  options: {
+    responsive: true, maintainAspectRatio: false,
+    plugins: { legend: { display: false } },
+    scales: {
+      x: { ticks: { color: textColor, font: { size: 10 } }, grid: { display: false }, border: { display: false } },
+      y: { ticks: { color: textColor, font: { size: 10 } }, grid: { color: gridColor }, border: { display: false } }
+    }
+  }
+});
+
+new Chart(document.getElementById('c4'), {
+  type: 'bar',
+  data: {
+    labels: ['Personal', 'Home', 'Auto', 'Business'],
+    datasets: [
+      { label: 'Fully Recovered', data: [132, 86, 52, 26], backgroundColor: '#185FA5', borderRadius: 3, borderSkipped: false },
+      { label: 'Partial', data: [64, 43, 30, 17], backgroundColor: '#BA7517', borderRadius: 3, borderSkipped: false },
+      { label: 'Written Off', data: [24, 15, 5, 6], backgroundColor: '#A32D2D', borderRadius: 3, borderSkipped: false }
+    ]
+  },
+  options: {
+    responsive: true, maintainAspectRatio: false,
+    plugins: { legend: { display: false } },
+    scales: {
+      x: { ticks: { color: textColor, font: { size: 10 } }, grid: { display: false }, border: { display: false }, stacked: false },
+      y: { ticks: { color: textColor, font: { size: 10 } }, grid: { color: gridColor }, border: { display: false } }
+    }
+  }
+});
+</script>
